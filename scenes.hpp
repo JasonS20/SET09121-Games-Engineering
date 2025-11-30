@@ -8,16 +8,16 @@ class MenuScene : public Scene {
 private:
 	sf::Font _font;
 
-	sf::Texture _backgroundTex;
-	sf::Sprite _background;
+	sf::Texture _menu_backgroundTex;
+	sf::Sprite _menu_background;
 
 
-	sf::Text _title;
-	sf::Text _startText;
-	sf::Text _exitText;
+	sf::Text _menu_title;
+	sf::Text _menu_startText;
+	sf::Text _menu_exitText;
 
-	sf::RectangleShape _startButton;
-	sf::RectangleShape _exitButton;
+	sf::RectangleShape _menu_startButton;
+	sf::RectangleShape _menu_exitButton;
 
 public:
 	MenuScene() = default;
