@@ -1,20 +1,20 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
+#include <vector>
+#include "game_paramaters.hpp"
+#include "scenes.hpp"
+#include "game_system.hpp"
+
+using param = Parameters;
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode({ 200, 200 }), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+   
+    Scenes::menu = std::make_shared<MenuScene>();
+    Scenes::menu->load();
 
-    while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                window.close();
-            }
-        }
-        window.clear();
-        window.draw(shape);
-        window.display();
-    }
+
+    GameSystem::set_active_scene(Scenes::menu);
+    GameSystem::start(param::game_width, param::game_height, "Menu", param::time_step);
+
     return 0;
 }

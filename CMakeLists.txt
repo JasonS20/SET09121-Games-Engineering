@@ -1,7 +1,7 @@
-project(setup)
+project(menu)
 cmake_minimum_required(VERSION 3.11)
 # Require modern C++
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #### Setup Directories ####
@@ -15,7 +15,29 @@ add_subdirectory("lib/SFML")
 set(SFML_INCS "lib/SFML/include")
 link_directories("${CMAKE_BINARY_DIR}/lib/SFML/lib")
 
-#### Practical 1 ####
-add_executable(SFMLtest main.cpp)
-target_include_directories(SFMLtest PRIVATE ${SFML_INCS})
-target_link_libraries(SFMLtest sfml-graphics)
+
+#### level system ####
+
+
+#### Engine ####
+add_library(engine STATIC  engine/game_system.cpp
+                        engine/renderer.cpp)
+target_include_directories(engine INTERFACE engine)
+target_link_libraries(engine sfml-graphics)
+
+#### executable ####
+add_executable(menu 
+    main.cpp
+    scenes.cpp)
+target_include_directories(menu PRIVATE ${SFML_INCS} engine)
+target_link_libraries(menu sfml-graphics engine)
+set_target_properties(menu 
+    PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
+)
+add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND} 
+  -E copy_directory
+    "${PROJECT_SOURCE_DIR}/resources"
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources
+)
+add_dependencies(menu copy_resources)
