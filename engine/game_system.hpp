@@ -7,7 +7,6 @@ class Scene {
 public:
     virtual ~Scene() = default;
 
-    // Default implementations are inline here, so they DO have bodies.
     virtual void update(const float& dt) {}
     virtual void render() {}
     virtual void load() {}
@@ -16,16 +15,15 @@ public:
 
 class GameSystem {
 public:
-    // Main game loop
+
     static void start(unsigned int width,
         unsigned int height,
         const std::string& name,
         const float& time_step);
 
-    // Switch which scene is currently active
+
     static void set_active_scene(const std::shared_ptr<Scene>& act_sc);
 
-    // (Optional) getter if you need it later
     static std::shared_ptr<Scene> get_active_scene() { return _active_scene; }
 
 private:

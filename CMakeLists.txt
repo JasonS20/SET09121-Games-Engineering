@@ -1,4 +1,4 @@
-project(menu)
+project(Awakening)
 cmake_minimum_required(VERSION 3.11)
 # Require modern C++
 set(CMAKE_CXX_STANDARD 17)
@@ -26,12 +26,12 @@ target_include_directories(engine INTERFACE engine)
 target_link_libraries(engine sfml-graphics)
 
 #### executable ####
-add_executable(menu 
+add_executable(Awakening 
     main.cpp
     scenes.cpp)
-target_include_directories(menu PRIVATE ${SFML_INCS} engine)
-target_link_libraries(menu sfml-graphics engine)
-set_target_properties(menu 
+target_include_directories(Awakening PRIVATE ${SFML_INCS} engine)
+target_link_libraries(Awakening sfml-graphics engine)
+set_target_properties(Awakening 
     PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
 )
@@ -40,4 +40,4 @@ add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
     "${PROJECT_SOURCE_DIR}/resources"
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources
 )
-add_dependencies(menu copy_resources)
+add_dependencies(Awakening copy_resources)
