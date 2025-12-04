@@ -1,6 +1,9 @@
 #pragma once
 #include <memory>
 #include "game_system.hpp"
+#include <vector>
+#include <box2d/box2d.h>
+
 
 
 
@@ -35,17 +38,39 @@ private:
 	sf::Sprite _houseBackground;
 	sf::RectangleShape _houseDrawer;
 	sf::RectangleShape _houseBookshelf;
+	sf::RectangleShape _housePicture;
 	sf::RectangleShape _houseDoor;
+	sf::RectangleShape _player;
+	sf::RectangleShape _houseStool;
+	sf::RectangleShape _housePlayer;
+	sf::Texture _playerTexture;
+	sf::Sprite _playerSprite;
+	sf::Vector2f _playerPos;
+	sf::Vector2f _savedPlayerPos;
+	bool _houseStoolControlEnabled = false;
+	bool _houseLeftMouseDownPrev = false;
+	bool _playerOnStool = false;
+
+	float _playerSpeed = 350.f;
+	float _interactionRange = 120.f;
 
 	bool _houseDrawerOpened = false;
 	bool _houseNoteVisible = false;
 	bool _houseClueVisible = false;
+	bool _housePictureVisible = false;
 	bool _houseDoorClickable = false;
 	bool _houseLockedMsgVisible = false;
+	bool _houseMovingStool = false;
+	bool _houseStoolPlaced = false;
+	float _houseStoolFloorY = 0.f;
+	sf::Vector2f _houseStoolVelocity{ 0.f, 0.f };
+	sf::Vector2f _housePlayerVelocity{ 0.f, 0.f };
 
 	sf::RectangleShape _houseLockedMsgBox;
 	sf::Text _houseLockedMsgText;
 
+	sf::Text _houseStoolMsgText;
+	sf::Vector2f _houseStoolDragOffset;
 
 	sf::RectangleShape _houseClueBox;
 	sf::Text _houseClueText;
@@ -55,6 +80,9 @@ private:
 	sf::Text _houseNoteText;
 	sf::RectangleShape _houseNoteBox;
 
+	sf::Text _housePictureText;
+	sf::RectangleShape _housePictureBox;
+
 	std::string _houseEnteredCode;
 	sf::Text _housePadlockText;
 	sf::Text _housePadlockInstr;
@@ -62,11 +90,20 @@ private:
 	std::vector<sf::RectangleShape> _houseBooks;
 	int _houseCorrectBookIndex = 3;
 
+
+	b2WorldId _world_id{};
+	bool _world_created = false;
+	std::vector<b2BodyId> _bodies;
+	std::vector<std::shared_ptr<sf::RectangleShape>> _sprites;
+
 public:
 	Level3Scene() = default;
 	void update(const float& dt) override;
 	void render() override;
 	void load() override;
+	void unload() override;
+
+
 
 };
 

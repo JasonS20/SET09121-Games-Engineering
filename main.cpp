@@ -1,7 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
-#include "game_paramaters.hpp"
+#include "game_parameters.hpp"
 #include "scenes.hpp"
 #include "game_system.hpp"
 
