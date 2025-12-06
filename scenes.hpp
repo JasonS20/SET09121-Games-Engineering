@@ -47,12 +47,23 @@ private:
 	sf::Sprite _playerSprite;
 	sf::Vector2f _playerPos;
 	sf::Vector2f _savedPlayerPos;
+	sf::Texture _furnitureTexture;
+	sf::Sprite _DrawerSprite;
+	sf::Sprite _BookshelfSprite;
+	sf::Sprite _StoolSprite;
+	sf::Sprite _PictureSprite;
+	sf::Sprite _WindowSprite;
+	sf::RectangleShape _DrawerLegsLeft;
+	sf::RectangleShape _DrawerLegsRight;
+
+
+
 	bool _houseStoolControlEnabled = false;
 	bool _houseLeftMouseDownPrev = false;
 	bool _playerOnStool = false;
 
 	float _playerSpeed = 350.f;
-	float _interactionRange = 120.f;
+	float _interactionRange = 110.f;
 
 	bool _houseDrawerOpened = false;
 	bool _houseNoteVisible = false;
@@ -62,6 +73,7 @@ private:
 	bool _houseLockedMsgVisible = false;
 	bool _houseMovingStool = false;
 	bool _houseStoolPlaced = false;
+	bool _houseStoolText = false;
 	float _houseStoolFloorY = 0.f;
 	sf::Vector2f _houseStoolVelocity{ 0.f, 0.f };
 	sf::Vector2f _housePlayerVelocity{ 0.f, 0.f };

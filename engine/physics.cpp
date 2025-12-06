@@ -49,8 +49,15 @@ namespace Physics {
         stoolPos.x = std::clamp(stoolPos.x, 0.f, sceneWidth - stool.getSize().x);
         stoolPos.y = floorY;
         stool.setPosition(stoolPos);
-        if (stoolPos.x <= 0.f || stoolPos.x >= sceneWidth - stool.getSize().x) {
+        if (stoolPos.x <= 60.f || stoolPos.x >= sceneWidth - stool.getSize().x - 60.f) {
             stoolVelocity.x = 0.f;
+        }
+        if (stoolPos.x <= 60.f) {
+            stool.setPosition(stoolPos.x + 1.f, stoolPos.y);
+        }
+
+        if (stoolPos.x >= sceneWidth - stool.getSize().x - 60.f) {
+            stool.setPosition(stoolPos.x - 1.f, stoolPos.y);
         }
     }
 }

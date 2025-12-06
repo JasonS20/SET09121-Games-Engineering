@@ -128,15 +128,14 @@ void Level3Scene::update(const float& dt) {
 
     if (_state == HouseState::Explore) {
 
-        if (leftMouseDown && !_houseLeftMouseDownPrev &&
-            _houseStool.getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y)) {
+        if (withinRange(_houseStool) && leftMouseDown && !_houseLeftMouseDownPrev && !_houseNoteVisible && !_housePictureVisible && !_houseClueVisible && _houseStool.getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y)) {
             _houseStoolControlEnabled = !_houseStoolControlEnabled;
             if (_houseStoolControlEnabled) {
-                _houseStoolMsgText.setString("Stool selected: walk into it to push toward the shelf. Click again to release.");
+                _houseStoolMsgText.setString("Stool selected:\nWalk into it to push toward the shelf.\nClick again to release.\nRight click to stand and get of the stool.");
             }
             else {
                 _houseStoolVelocity = { 0.f, 0.f };
-                _houseStoolMsgText.setString("Click the stool to select it before pushing toward the shelf.");
+                _houseStoolMsgText.setString("");
             }
         }
 
@@ -144,15 +143,14 @@ void Level3Scene::update(const float& dt) {
         {
             sf::Vector2i mousePos = sf::Mouse::getPosition(Renderer::get_window());
 
-            // Only interact if mouse hovers over the stool
+
             if (_houseStool.getGlobalBounds().contains(mousePos.x, mousePos.y))
             {
                 if (!_playerOnStool)
                 {
-                    // Save old position
+
                     _savedPlayerPos = _playerPos;
 
-                    // Move to top of the stool
                     sf::Vector2f stoolPos = _houseStool.getPosition();
                     sf::Vector2f stoolSize = _houseStool.getSize();
 
@@ -164,7 +162,6 @@ void Level3Scene::update(const float& dt) {
                 }
                 else
                 {
-                    // Move back to previous floor position
                     _playerPos = _savedPlayerPos;
                     _playerSprite.setPosition(_playerPos);
                     _playerOnStool = false;
@@ -207,8 +204,7 @@ void Level3Scene::update(const float& dt) {
 
 
 
-        if (withinRange(_houseDrawer) && !_housePictureVisible && !_houseClueVisible && _houseDrawer.getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y) &&
-            sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+        if (withinRange(_houseDrawer) && !_housePictureVisible && !_houseClueVisible && _houseStoolMsgText.getString().isEmpty() && _houseDrawer.getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
 
             _houseDrawerOpened = true;
             _houseNoteVisible = true;
@@ -219,8 +215,7 @@ void Level3Scene::update(const float& dt) {
         }
 
 
-        if (withinRange(_housePicture) && !_houseNoteVisible && !_houseClueVisible && _housePicture.getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y) &&
-            sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+        if (withinRange(_housePicture) && !_houseNoteVisible && !_houseClueVisible && _houseStoolMsgText.getString().isEmpty() && _housePicture.getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
 
             _housePictureVisible = true;
         }
@@ -229,46 +224,15 @@ void Level3Scene::update(const float& dt) {
             _housePictureVisible = false;
         }
 
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && _houseDrawerOpened) {
-            for (size_t i = 0; i < _houseBooks.size(); i++) {
-                if (withinRange(_houseBooks[i]) && !_houseNoteVisible && !_housePictureVisible && _houseBooks[i].getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y)) {
+        if (withinRange(_houseBookshelf) && !_houseNoteVisible && !_housePictureVisible && _houseStoolMsgText.getString().isEmpty() && _houseBookshelf.getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
 
-                    if (i == _houseCorrectBookIndex) {
-                        _houseClueVisible = true;
-                    }
-                    else {
-                        _houseStoolMsgText.setString("Need to be taller to reach it.");
-                    }
-
-                    return;
-                }
-            }
+            _houseClueVisible = true;
         }
 
         if (_houseClueVisible && sf::Keyboard::isKeyPressed(sf::Keyboard::Delete)) {
             _houseClueVisible = false;
             _houseDoorClickable = true;
         }
-
-        if (withinRange(_houseDoor) && !_houseNoteVisible && !_housePictureVisible && !_houseClueVisible && _houseDoor.getGlobalBounds().contains(mousePos.x, mousePos.y) &&
-            sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        {
-            if (_houseDoorClickable)
-            {
-                std::cout << "Door clicked - keypad active!" << std::endl;
-                _state = HouseState::Padlock;
-            }
-            else
-            {
-                _houseLockedMsgVisible = true;
-            }
-        }
-
-        if (_houseLockedMsgVisible && sf::Keyboard::isKeyPressed(sf::Keyboard::Delete))
-        {
-            _houseLockedMsgVisible = false;
-        }
-
 
         sf::Vector2f moveDir(0.f, 0.f);
 
@@ -305,9 +269,26 @@ void Level3Scene::update(const float& dt) {
             const float pi = 3.14159;
             _sprites[i]->setRotation((180.f / pi));
         }
-        
-}
 
+        if (withinRange(_houseDoor) && !_houseNoteVisible && !_housePictureVisible && !_houseClueVisible && _houseStoolMsgText.getString().isEmpty() && _houseDoor.getGlobalBounds().contains(mousePos.x, mousePos.y) &&
+            sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            if (_houseDoorClickable)
+            {
+                std::cout << "Door clicked - keypad active!" << std::endl;
+                _state = HouseState::Padlock;
+            }
+            else
+            {
+                _houseLockedMsgVisible = true;
+            }
+        }
+
+        if (_houseLockedMsgVisible && sf::Keyboard::isKeyPressed(sf::Keyboard::Delete))
+        {
+            _houseLockedMsgVisible = false;
+        }
+    }
 
 
 
@@ -333,7 +314,7 @@ void Level3Scene::update(const float& dt) {
             _state = HouseState::Explore;
         }
     }
-
+    _StoolSprite.setPosition(_houseStool.getPosition());
     _houseLeftMouseDownPrev = leftMouseDown;
 
     Scene::update(dt);
@@ -342,13 +323,20 @@ void Level3Scene::update(const float& dt) {
 
 void Level3Scene::render() {
     Renderer::queue(&_houseBackground);
-    Renderer::queue(&_houseDrawer);
+    Renderer::queue(&_DrawerLegsLeft);
+    Renderer::queue(&_DrawerLegsRight);
+    Renderer::queue(&_DrawerSprite);
+    Renderer::queue(&_BookshelfSprite);
     Renderer::queue(&_houseBookshelf);
+    Renderer::queue(&_PictureSprite);
     Renderer::queue(&_housePicture);
     Renderer::queue(&_houseDoor);
     Renderer::queue(&_housePlayer);
     Renderer::queue(&_houseStool);
+    Renderer::queue(&_StoolSprite);
+    Renderer::queue(&_WindowSprite);
     Renderer::queue(&_playerSprite);
+    
 
 
     
@@ -404,54 +392,57 @@ void Level3Scene::load() {
     _houseBackground.setTexture(_houseBgTexture);
     _houseBackground.setScale(1920.f / _houseBgTexture.getSize().x, 1080.f / _houseBgTexture.getSize().y);
 
+    if (!_furnitureTexture.loadFromFile("resources/images/FurnitureSpriteSheet.png")) {
+        std::cerr << "Failed to load furniture sprite sheet!\n";
+    }
+
+    sf::IntRect DrawerRect(0, 0, 32, 16);
+
+    _DrawerSprite.setTexture(_furnitureTexture);
+    _DrawerSprite.setTextureRect(DrawerRect);
+    _DrawerSprite.setScale(5.1f, 5.9f);
+    _DrawerSprite.setPosition(444.f, 787.f);
+
+    _DrawerLegsLeft.setSize({ 10, 90 });
+    _DrawerLegsLeft.setFillColor(sf::Color(161, 101, 87));
+    _DrawerLegsLeft.setPosition(460, 860);
+
+    _DrawerLegsRight.setSize({ 10, 90 });
+    _DrawerLegsRight.setFillColor(sf::Color(161, 101, 87));
+    _DrawerLegsRight.setPosition(580, 860);
+
     _houseDrawer.setSize({ 150, 80 });
     _houseDrawer.setFillColor(sf::Color(0, 0, 0, 0));
     _houseDrawer.setPosition(450, 800);
 
-    _houseBookshelf.setSize({ 400, 200 });
-    _houseBookshelf.setPosition( 1300, 600);
+    sf::IntRect BookshelfRect(0, 18, 32, 30);
+
+    _BookshelfSprite.setTexture(_furnitureTexture);
+    _BookshelfSprite.setTextureRect(BookshelfRect);
+    _BookshelfSprite.setScale(14.f, 13.5f);
+    _BookshelfSprite.setPosition(1272.f, 573.f);
+
+    _houseBookshelf.setSize({ 42, 95 });
+    _houseBookshelf.setPosition( 1552, 667);
     _houseBookshelf.setFillColor(sf::Color(0, 0, 0, 0));
 
-    _housePicture.setSize({ 201, 122 });
-    _housePicture.setPosition(425, 629);
+    _housePicture.setSize({ 100, 135 });
+    _housePicture.setPosition(472, 586);
     _housePicture.setFillColor(sf::Color(0, 0, 0, 0));
 
-
-    _houseBookshelf.setOutlineThickness(6);
-    _houseBookshelf.setOutlineColor(sf::Color(0, 0, 0, 0));
-
-
-
-    _houseBooks.clear();
-
-    float padding = 20.f;
-    float shelfX = _houseBookshelf.getPosition().x + padding;
-    float shelfY = _houseBookshelf.getPosition().y + padding;
-    float shelfWidth = _houseBookshelf.getSize().x - (padding * 2);
-    float shelfHeight = _houseBookshelf.getSize().y - (padding * 2);
-
-
-    float bookWidth = shelfWidth / 6.f - 5.f;
-    float bookHeight = shelfHeight;
-
-
-    for (int i = 0; i < 6; i++) {
-        sf::RectangleShape book({ bookWidth, bookHeight });
-        book.setPosition(shelfX + i * (bookWidth + 5.f), shelfY);
-
-        book.setFillColor(sf::Color(0, 0, 0, 0));
-
-        _houseBooks.push_back(book);
-    }
+    _PictureSprite.setTexture(_furnitureTexture);
+    _PictureSprite.setTextureRect(sf::IntRect(38, 20, 21, 28));
+    _PictureSprite.setScale(5.1f, 5.9f);
+    _PictureSprite.setPosition(472, 586);
 
     _houseDoor.setSize({ 200, 400 });
-    if (_houseDoorClickable)
-        _houseDoor.setFillColor(sf::Color(0, 0, 0, 0));
-    else
-        _houseDoor.setFillColor(sf::Color(0, 0, 0, 0));
+    _houseDoor.setFillColor(sf::Color(0, 0, 0, 0));
     _houseDoor.setPosition(50, 550);
 
-    
+    _WindowSprite.setTexture(_furnitureTexture);
+    _WindowSprite.setTextureRect(sf::IntRect(48, 48, 32, 16));
+    _WindowSprite.setScale(13.f, 13.f);
+    _WindowSprite.setPosition(1290, 300);
 
     if (!_playerTexture.loadFromFile("resources/images/player.png")) {
         std::cerr << "Failed to load player texture!\n";
@@ -468,14 +459,26 @@ void Level3Scene::load() {
     _player.setPosition(_playerPos);
     _playerSprite.setPosition(_playerPos);
 
+    if (!_furnitureTexture.loadFromFile("resources/images/FurnitureSpriteSheet.png")) {
+        std::cerr << "Failed to load furniture sprite sheet!\n";
+    }
+
+
+
     _houseStoolPlaced = false;
     _houseStool.setSize({ 80, 80 });
-    _houseStool.setFillColor(sf::Color(180, 130, 80));
-    _houseStool.setOutlineThickness(4);
-    _houseStool.setOutlineColor(sf::Color(120, 80, 40));
-    _houseStool.setPosition(850, 870);
+    _houseStool.setFillColor(sf::Color(0, 0, 0, 0));
+    _houseStool.setOutlineThickness(1);
+    _houseStool.setOutlineColor(sf::Color(0, 0, 0, 0));
+    _houseStool.setPosition(850, 880);
     _houseStoolFloorY = _houseStool.getPosition().y;
     _houseStoolVelocity = { 0.f, 0.f };
+
+
+    _StoolSprite.setTexture(_furnitureTexture);
+    _StoolSprite.setTextureRect(sf::IntRect(48, 68, 16, 12));
+    _StoolSprite.setScale(5.1f, 5.9f);
+    _StoolSprite.setPosition(_houseStool.getPosition());
 
     _housePlayer.setSize({ 60, 120 });
     _housePlayer.setFillColor(sf::Color(0, 0, 0, 0));
@@ -492,7 +495,7 @@ void Level3Scene::load() {
     _houseNoteText.setFont(_houseFont);
     _houseNoteText.setCharacterSize(28);
     _houseNoteText.setFillColor(sf::Color::Black);
-    _houseNoteText.setString("Always remember \ngreen was always my favourite.");
+    _houseNoteText.setString("Always remember\nBlue was always my favourite.");
     _houseNoteText.setPosition(700, 350);
 
     _houseClueBox.setSize({ 600, 200 });
@@ -502,7 +505,7 @@ void Level3Scene::load() {
     _houseClueText.setFont(_houseFont);
     _houseClueText.setCharacterSize(28);
     _houseClueText.setFillColor(sf::Color::Black);
-    _houseClueText.setString("The book open to page 34");
+    _houseClueText.setString("The book opened to page 34");
     _houseClueText.setPosition(700, 350);
 
     _housePictureBox.setSize({ 600, 200 });
@@ -539,16 +542,9 @@ void Level3Scene::load() {
 
 
     _houseStoolMsgText.setFont(_houseFont);
-    _houseStoolMsgText.setCharacterSize(24);
-    _houseStoolMsgText.setFillColor(sf::Color::Yellow);
-    _houseStoolMsgText.setString("");
-    _houseStoolMsgText.setPosition(700, 800);
-
-    _houseStoolMsgText.setFont(_houseFont);
-    _houseStoolMsgText.setCharacterSize(24);
-    _houseStoolMsgText.setFillColor(sf::Color::Yellow);
-    _houseStoolMsgText.setString("Walk into the stool to push it toward the shelf.");
-    _houseStoolMsgText.setPosition(700, 800);
+    _houseStoolMsgText.setCharacterSize(28);
+    _houseStoolMsgText.setFillColor(sf::Color::Black);
+    _houseStoolMsgText.setPosition(575, 350);
 
 
     _sprites.clear();
