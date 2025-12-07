@@ -1,3 +1,6 @@
 [submodule "lib/SFML"]
 	path = lib/SFML
 	url = https://github.com/SFML/SFML.git
+[submodule "lib/--force"]
+	path = lib/--force
+	url = https://github.com/erincatto/box2d.git
