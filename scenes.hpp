@@ -7,8 +7,9 @@
 
 
 
-
+//Creates a scene MenuScene
 class MenuScene : public Scene {
+//Defines all the variables in the menu scene
 private:
 	sf::Font _font;
 
@@ -19,9 +20,14 @@ private:
 	sf::Text _menu_title;
 	sf::Text _menu_startText;
 	sf::Text _menu_exitText;
+	sf::Text _menu_ControlsText;
+	sf::Text _menu_ControlsTextOutput;
 
 	sf::RectangleShape _menu_startButton;
 	sf::RectangleShape _menu_exitButton;
+	sf::RectangleShape _menu_ControlsButton;
+
+	bool _controlsActive = false;
 
 public:
 	MenuScene() = default;
@@ -30,7 +36,9 @@ public:
 	void load() override;
 };
 
+//Creates a scene MenuScene
 class Level3Scene : public Scene {
+//Defines all the variables in the menu scene
 private:
 	enum class HouseState { Explore, Padlock };
 	HouseState _state = HouseState::Explore;
@@ -125,12 +133,13 @@ public:
 	void update(const float& dt) override;
 	void render() override;
 	void load() override;
-	void unload() override;
+
 
 
 
 };
 
+//Creates the Struct Scene which Holds the levels
 struct Scenes {
 	static std::shared_ptr<Scene> menu;
 	static std::shared_ptr<Scene> level3;
