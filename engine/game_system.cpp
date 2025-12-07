@@ -46,7 +46,7 @@ void GameSystem::set_active_scene(const std::shared_ptr<Scene>& act_sc) {
 }
 
 void GameSystem::_init() {
-    // Nothing yet — but you could seed RNG, etc.
+
 }
 
 void GameSystem::clean() {
