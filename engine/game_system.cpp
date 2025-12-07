@@ -14,7 +14,7 @@ void GameSystem::start(unsigned int width,unsigned int height,const std::string&
         static sf::Clock clock;
         float dt = clock.restart().asSeconds();
 
-        // Handle window events
+
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
@@ -23,7 +23,7 @@ void GameSystem::start(unsigned int width,unsigned int height,const std::string&
             }
         }
 
-        // Escape closes as well
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
             window.close();
         }
@@ -33,7 +33,7 @@ void GameSystem::start(unsigned int width,unsigned int height,const std::string&
         _update(dt);
         _render();
 
-        sf::sleep(sf::seconds(time_step));  // crude frame cap
+        sf::sleep(sf::seconds(time_step));
         window.display();
     }
 

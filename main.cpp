@@ -8,15 +8,17 @@
 using param = Parameters;
 
 int main() {
+
+    //initialises the different Scenes within the game 
    
     Scenes::menu = std::make_shared<MenuScene>();
     Scenes::menu->load();
     Scenes::level3 = std::make_shared<Level3Scene>();
     Scenes::level3->load();
 
-
+    //Start the game at the menu screen
     GameSystem::set_active_scene(Scenes::menu);
-    GameSystem::start(param::game_width, param::game_height, "Awakening", param::time_step);
+    GameSystem::start(param::game_width, param::game_height, "The Awakening", param::time_step);
 
     return 0;
 }
