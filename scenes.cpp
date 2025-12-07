@@ -25,10 +25,10 @@ void MenuScene::update(const float& dt) {
     sf::Vector2i mousePos = sf::Mouse::getPosition(Renderer::get_window());
 
     _menu_startButton.setOutlineColor(_menu_startButton.getGlobalBounds().contains(mousePos.x, mousePos.y)
-        ? sf::Color::Yellow : sf::Color::White);
+        ? sf::Color::White : sf::Color::Black);
 
     _menu_exitButton.setOutlineColor(_menu_exitButton.getGlobalBounds().contains(mousePos.x, mousePos.y)
-        ? sf::Color::Yellow : sf::Color::White);
+        ? sf::Color::White : sf::Color::Black);
 
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
         if (_menu_startButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
@@ -60,6 +60,8 @@ void MenuScene::load() {
         std::cerr << "Failed to load menu background image\n";
     }
     _menu_background.setTexture(_menu_backgroundTex);
+    _menu_background.setScale(5.f, 5.f);
+    _menu_background.setPosition(585.f, 250.f);
 
 
     _font.loadFromFile("resources/fonts/RobotoMono-Regular.ttf");
@@ -77,35 +79,36 @@ void MenuScene::load() {
     _menu_startText.setFont(_font);
     _menu_startText.setString("Start new game");
     _menu_startText.setCharacterSize(32);
-    _menu_startText.setFillColor(sf::Color::White);
+    _menu_startText.setFillColor(sf::Color::Black);
 
     sf::FloatRect stBounds = _menu_startText.getLocalBounds();
     _menu_startText.setOrigin(stBounds.width / 2, stBounds.height / 2);
-    _menu_startText.setPosition(param::game_width / 2, 300);
+    _menu_startText.setPosition(param::game_width / 2, 500);
 
     _menu_startButton.setSize({ stBounds.width + 40, stBounds.height + 30 });
     _menu_startButton.setOrigin(_menu_startButton.getSize() / 2.f);
     _menu_startButton.setPosition(_menu_startText.getPosition());
     _menu_startButton.setFillColor(sf::Color::Transparent);
     _menu_startButton.setOutlineThickness(3);
-    _menu_startButton.setOutlineColor(sf::Color::White);
+    _menu_startButton.setOutlineColor(sf::Color::Black);
 
 
     _menu_exitText.setFont(_font);
     _menu_exitText.setString("Exit game");
     _menu_exitText.setCharacterSize(32);
-    _menu_exitText.setFillColor(sf::Color::White);
+    _menu_exitText.setFillColor(sf::Color::Black);
 
     sf::FloatRect exBounds = _menu_exitText.getLocalBounds();
     _menu_exitText.setOrigin(exBounds.width / 2, exBounds.height / 2);
-    _menu_exitText.setPosition(param::game_width / 2, 400);
+    _menu_exitText.setPosition(param::game_width / 2, 600);
+    _menu_exitText.setOutlineColor(sf::Color::Black);
 
     _menu_exitButton.setSize({ exBounds.width + 40, exBounds.height + 30 });
     _menu_exitButton.setOrigin(_menu_exitButton.getSize() / 2.f);
     _menu_exitButton.setPosition(_menu_exitText.getPosition());
     _menu_exitButton.setFillColor(sf::Color::Transparent);
     _menu_exitButton.setOutlineThickness(3);
-    _menu_exitButton.setOutlineColor(sf::Color::White);
+    _menu_exitButton.setOutlineColor(sf::Color::Black);
 }
 
 void Level3Scene::update(const float& dt) {
