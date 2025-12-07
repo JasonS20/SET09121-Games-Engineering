@@ -16,7 +16,7 @@ int main() {
 
 
     GameSystem::set_active_scene(Scenes::menu);
-    GameSystem::start(param::game_width, param::game_height, "Menu", param::time_step);
+    GameSystem::start(param::game_width, param::game_height, "Awakening", param::time_step);
 
     return 0;
 }

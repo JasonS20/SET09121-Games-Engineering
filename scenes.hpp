@@ -3,6 +3,7 @@
 #include "game_system.hpp"
 #include <vector>
 #include <box2d/box2d.h>
+#include <SFML/Audio.hpp>
 
 
 
@@ -87,6 +88,17 @@ private:
 	sf::RectangleShape _houseClueBox;
 	sf::Text _houseClueText;
 
+	sf::SoundBuffer _houseDoorLockedBuffer;
+	sf::Sound _houseDoorLockedSound;
+
+	sf::SoundBuffer _houseDoorOpenBuffer;
+	sf::Sound _houseDoorOpenSound;
+
+	sf::SoundBuffer _houseDrawerOpenBuffer;
+	sf::Sound _houseDrawerOpenSound;
+
+	sf::SoundBuffer _houseBookOpenBuffer;
+	sf::Sound _houseBookOpenSound;
 
 	sf::Font _houseFont;
 	sf::Text _houseNoteText;

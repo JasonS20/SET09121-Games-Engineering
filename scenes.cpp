@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <SFML/Audio.hpp>
 #include <cmath>
 #include "scenes.hpp"
 #include "game_parameters.hpp"
@@ -192,20 +193,8 @@ void Level3Scene::update(const float& dt) {
         }
         Physics::clampStoolWithinScene(settings.sceneWidth, _houseStoolFloorY, _houseStool, _houseStoolVelocity);
 
-        float stoolCenterX = _houseStool.getPosition().x + _houseStool.getSize().x / 2.f;
-        float stoolBottom = _houseStool.getPosition().y + _houseStool.getSize().y;
-        float shelfBottom = _houseBookshelf.getPosition().y + _houseBookshelf.getSize().y;
-
-        bool alignedWithShelf = std::abs(stoolCenterX - (_houseBookshelf.getPosition().x +
-            _houseBookshelf.getSize().x / 2.f)) <= _houseBookshelf.getSize().x / 2.f;
-        bool closeInHeight = std::abs(stoolBottom - shelfBottom) <= 400.f;
-        _houseStoolPlaced = alignedWithShelf && closeInHeight;
-
-
-
-
         if (withinRange(_houseDrawer) && !_housePictureVisible && !_houseClueVisible && _houseStoolMsgText.getString().isEmpty() && _houseDrawer.getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-
+            _houseDrawerOpenSound.play();
             _houseDrawerOpened = true;
             _houseNoteVisible = true;
         }
@@ -225,7 +214,7 @@ void Level3Scene::update(const float& dt) {
         }
 
         if (withinRange(_houseBookshelf) && !_houseNoteVisible && !_housePictureVisible && _houseStoolMsgText.getString().isEmpty() && _houseBookshelf.getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-
+            _houseBookOpenSound.play();
             _houseClueVisible = true;
         }
 
@@ -280,6 +269,7 @@ void Level3Scene::update(const float& dt) {
             }
             else
             {
+                _houseDoorLockedSound.play();
                 _houseLockedMsgVisible = true;
             }
         }
@@ -304,6 +294,7 @@ void Level3Scene::update(const float& dt) {
         }
 
         if (_houseEnteredCode == "2334") {
+            _houseDoorOpenSound.play();
             GameSystem::set_active_scene(Scenes::menu);
         }
 
@@ -386,7 +377,6 @@ void Level3Scene::load() {
 
 
 
-    std::cout << "Max texture size: " << sf::Texture::getMaximumSize() << "\n";
 
     _houseBgTexture.loadFromFile("resources/images/house_background.png");
     _houseBackground.setTexture(_houseBgTexture);
@@ -395,6 +385,26 @@ void Level3Scene::load() {
     if (!_furnitureTexture.loadFromFile("resources/images/FurnitureSpriteSheet.png")) {
         std::cerr << "Failed to load furniture sprite sheet!\n";
     }
+
+    if (!_houseDoorLockedBuffer.loadFromFile("resources/audio/lockeddoor.mp3")) {
+        std::cerr << "Failed to load door locked sound!\n";
+    }
+    _houseDoorLockedSound.setBuffer(_houseDoorLockedBuffer);
+
+    if (!_houseDoorOpenBuffer.loadFromFile("resources/audio/opendoor.mp3")) {
+        std::cerr << "Failed to load door locked sound!\n";
+    }
+    _houseDoorOpenSound.setBuffer(_houseDoorOpenBuffer);
+
+    if (!_houseDrawerOpenBuffer.loadFromFile("resources/audio/draweropen.mp3")) {
+        std::cerr << "Failed to load door locked sound!\n";
+    }
+    _houseDrawerOpenSound.setBuffer(_houseDrawerOpenBuffer);
+
+    if (!_houseBookOpenBuffer.loadFromFile("resources/audio/bookopen.mp3")) {
+        std::cerr << "Failed to load door locked sound!\n";
+    }
+    _houseBookOpenSound.setBuffer(_houseBookOpenBuffer);
 
     sf::IntRect DrawerRect(0, 0, 32, 16);
 
@@ -458,11 +468,6 @@ void Level3Scene::load() {
     _playerPos.y = 830;
     _player.setPosition(_playerPos);
     _playerSprite.setPosition(_playerPos);
-
-    if (!_furnitureTexture.loadFromFile("resources/images/FurnitureSpriteSheet.png")) {
-        std::cerr << "Failed to load furniture sprite sheet!\n";
-    }
-
 
 
     _houseStoolPlaced = false;

@@ -35,7 +35,7 @@ add_executable(Awakening
     b2d_utils.cpp
     )
 target_include_directories(Awakening PRIVATE ${SFML_INCS} ${B2D_INCS} engine)
-target_link_libraries(Awakening sfml-graphics  engine box2d)
+target_link_libraries(Awakening sfml-graphics  sfml-audio engine box2d)
 set_target_properties(Awakening 
     PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
@@ -65,4 +65,22 @@ add_custom_command(TARGET Awakening POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:sfml-system>
         $<TARGET_FILE_DIR:Awakening>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:sfml-audio>
+        $<TARGET_FILE_DIR:Awakening>
 )
+
+# Copy bundled OpenAL DLL alongside the executable if it is available
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(OPENAL_DLL_PATH "${PROJECT_SOURCE_DIR}/lib/SFML/extlibs/bin/x64/openal32.dll")
+else()
+    set(OPENAL_DLL_PATH "${PROJECT_SOURCE_DIR}/lib/SFML/extlibs/bin/x86/openal32.dll")
+endif()
+
+if(EXISTS ${OPENAL_DLL_PATH})
+    add_custom_command(TARGET Awakening POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${OPENAL_DLL_PATH}
+            $<TARGET_FILE_DIR:Awakening>
+    )
+endif()
