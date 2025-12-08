@@ -36,8 +36,112 @@ public:
 	void load() override;
 };
 
+
+class Level1Scene : public Scene {
+
+private:
+	enum class OutsideState { Exploring, Name };
+	OutsideState _state = OutsideState::Exploring;
+
+
+	sf::Texture _outsideBgTexture;
+	sf::Sprite _outsideBackground;
+	sf::RectangleShape _outsideShop;
+	sf::RectangleShape _outsideDoor;
+	sf::RectangleShape _outsideLamp;
+	sf::RectangleShape _outsideLetter;
+	sf::RectangleShape _player;
+	sf::RectangleShape _outsideBox;
+	sf::RectangleShape _outsidePlayer;
+	sf::Texture _playerTexture;
+	sf::Sprite _playerSprite;
+	sf::Vector2f _playerPos;
+	sf::Vector2f _savedPlayerPos;
+	sf::Texture _furnitureTexture;
+	sf::Texture _shopTexture;
+	sf::Sprite _ShopSprite;
+	sf::Texture _letterTexture;
+	sf::Sprite _LetterSprite;
+	sf::Texture _BoxTexture;
+	sf::Sprite _BoxSprite;
+	sf::Texture _lampTexture;
+	sf::Sprite _LampSprite;
+	sf::Texture _DoorTexture;
+	sf::Sprite _DoorSprite;
+
+
+
+	bool _outsideBoxControlEnabled = false;
+	bool _outsideLeftMouseDownPrev = false;
+	bool _playerOnBox = false;
+
+
+
+	float _playerSpeed = 350.f;
+	float _interactionRange = 110.f;
+
+
+
+
+	bool _outsideShopTextVisible = false;
+	bool _outsideLampTextVisible = false;
+	bool _outsideDoorClickable = false;
+	bool _outsideLockedMsgVisible = false;
+	bool _outsideMovingBox = false;
+	bool _outsideBoxPlaced = false;
+	bool _outsideBoxText = false;
+	bool _outsideLetterVisible = false;
+	float _outsideBoxFloorY = 0.f;
+	sf::Vector2f _outsideBoxVelocity{ 0.f, 0.f };
+	sf::Vector2f _outsidePlayerVelocity{ 0.f, 0.f };
+
+	sf::Font _outsideFont;
+
+	sf::RectangleShape _outsideLockedMsgBox;
+	sf::Text _outsideLockedMsgText;
+
+	sf::Text _outsideBoxMsgText;
+	sf::Vector2f _outsideBoxDragOffset;
+
+
+	sf::Text _outsideLampText;
+	sf::RectangleShape _outsideLampBox;
+
+	sf::Text _outsideLetterText;
+	sf::RectangleShape _outsideLetterBox;
+
+	sf::Text _outsideShopText;
+	sf::RectangleShape _outsideShopBox;
+
+
+
+	std::string _outsideEnteredName;
+	sf::Text _outsideLockText;
+	sf::Text _outsideLockInstr;
+
+
+	b2WorldId _world_id{};
+	bool _world_created = false;
+	std::vector<b2BodyId> _bodies;
+	std::vector<std::shared_ptr<sf::RectangleShape>> _sprites;
+
+
+public:
+	Level1Scene() = default;
+	void update(const float& dt) override;
+	void render() override;
+	void load() override;
+
+
+
+
+
+
+};
+
+
 //Creates a scene MenuScene
-class Level3Scene : public Scene {
+class Level2Scene : public Scene {
 //Defines all the variables in the menu scene
 private:
 	enum class HouseState { Explore, Padlock };
@@ -129,11 +233,10 @@ private:
 	std::vector<std::shared_ptr<sf::RectangleShape>> _sprites;
 
 public:
-	Level3Scene() = default;
+	Level2Scene() = default;
 	void update(const float& dt) override;
 	void render() override;
 	void load() override;
-
 
 
 
@@ -142,5 +245,6 @@ public:
 //Creates the Struct Scene which Holds the levels
 struct Scenes {
 	static std::shared_ptr<Scene> menu;
-	static std::shared_ptr<Scene> level3;
+	static std::shared_ptr<Scene> level1;
+	static std::shared_ptr<Scene> level2;
 };
