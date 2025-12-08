@@ -13,8 +13,11 @@ int main() {
    
     Scenes::menu = std::make_shared<MenuScene>();
     Scenes::menu->load();
-    Scenes::level3 = std::make_shared<Level3Scene>();
-    Scenes::level3->load();
+    Scenes::level1 = std::make_shared<Level1Scene>();
+    Scenes::level1->load();
+    Scenes::level2 = std::make_shared<Level2Scene>();
+    Scenes::level2->load();
+    
 
     //Start the game at the menu screen
     GameSystem::set_active_scene(Scenes::menu);

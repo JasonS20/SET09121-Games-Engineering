@@ -47,14 +47,14 @@ add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
 )
 add_dependencies(Awakening copy_resources)
 
-# Copy Box2D DLL next to Awakening.exe after build
+#This is Ai generated
 add_custom_command(TARGET Awakening POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:box2d>
         $<TARGET_FILE_DIR:Awakening>
 )
 
-# Copy SFML DLLs next to Awakening.exe
+#This is Ai generated
 add_custom_command(TARGET Awakening POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:sfml-graphics>
@@ -70,7 +70,7 @@ add_custom_command(TARGET Awakening POST_BUILD
         $<TARGET_FILE_DIR:Awakening>
 )
 
-# Copy bundled OpenAL DLL alongside the executable if it is available
+#This is Ai generated
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(OPENAL_DLL_PATH "${PROJECT_SOURCE_DIR}/lib/SFML/extlibs/bin/x64/openal32.dll")
 else()

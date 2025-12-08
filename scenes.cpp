@@ -18,7 +18,8 @@
 using param = Parameters;
 
 std::shared_ptr<Scene> Scenes::menu;
-std::shared_ptr<Scene> Scenes::level3;
+std::shared_ptr<Scene> Scenes::level1;
+std::shared_ptr<Scene> Scenes::level2;
 
 
 //This makes the logic of the menu  
@@ -40,7 +41,7 @@ void MenuScene::update(const float& dt) {
     //This makes it so the buttons have functions once pressed 
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
         if (_menu_startButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-            GameSystem::set_active_scene(Scenes::level3);
+            GameSystem::set_active_scene(Scenes::level1);
         }
         if (_menu_exitButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
             Renderer::get_window().close();
@@ -166,8 +167,372 @@ void MenuScene::load() {
     _menu_ControlsTextOutput.setString("Press A/left arrow key to move left.\nPress D/right arrow key to move right.\nPress left click to interact with the world.\nPress right click to stand on certain objects.\nPress tab to open menu.");
 }
 
+void Level1Scene::update(const float& dt) {
+
+    //This gets the position of the mouse on the game
+    sf::Vector2i mousePos = sf::Mouse::getPosition(Renderer::get_window());
+
+    //This lets the user press tab to open up the menu page
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Tab)) {
+        GameSystem::set_active_scene(Scenes::menu);
+    }
+
+
+
+    //this sets up the way in wich the player has to be within a certain range to interact with objects
+    auto withinRange = [this](const sf::RectangleShape& target) {
+        sf::Vector2f center = target.getPosition() + target.getSize() / 2.f;
+        float dist = std::hypot(center.x - _playerPos.x, center.y - _playerPos.y);
+        return dist <= _interactionRange;
+    };
+
+    bool leftMouseDown = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+
+    //Checks to see if the player is in explore mode of the level
+    if (_state == OutsideState::Exploring) {
+
+
+        //This make it so the player input is stored and the move direction is stored so that they can move the player sprite and the stool if it is needing to be moved
+        sf::Vector2f moveDir(0.f, 0.f);
+        float playerInput = 0.f;
+        if (!_playerOnBox)
+        {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+                playerInput -= 1.f;
+                moveDir.x -= 1.f;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                playerInput += 1.f;
+                moveDir.x += 1.f;
+            }
+            _playerPos += moveDir * _playerSpeed * dt;
+
+            float halfWidth = _player.getSize().x / 2.f;
+            _playerPos.x = std::clamp(_playerPos.x, halfWidth, param::game_width - halfWidth);
+        }
+
+        //keeps the player within the edges of the game 
+        _playerPos.x = std::clamp(_playerPos.x, 0.0f, param::game_width - _outsidePlayer.getSize().x);
+
+        //sets the player sprite and the blayer hit box to that to where they are meant to be visually
+        _outsidePlayer.setPosition(_playerPos);
+        _playerSprite.setPosition(_playerPos);
+
+        //This makes the movement settings  of the player integrated within the physics system of the game 
+        Physics::MovementSettings settings{ 450.f, 8.f, 6.f, _outsideBoxFloorY, (float)param::game_width };
+        Physics::integratePlayer(dt, playerInput, settings, _outsidePlayer, _outsidePlayerVelocity);
+
+        //This checks to see if the controls of teh stool are enabled and makes the physics start to work 
+        if (_outsideBoxControlEnabled) {
+            Physics::dampAndMoveStool(dt, settings.friction, _outsideBox, _outsideBoxVelocity);
+            Physics::resolvePlayerStoolCollision(_outsidePlayer, _outsidePlayerVelocity, _outsideBox, _outsideBoxVelocity);
+        }
+        //this makes the stool stop if the stool is unselected
+        else {
+            _outsideBoxVelocity = { 0.f, 0.f };
+        }
+        //Keeps the stool within the scene game page
+        Physics::clampStoolWithinScene(settings.sceneWidth, _outsideBoxFloorY, _outsideBox, _outsideBoxVelocity);
+
+        //opens the drawer if it is clicked and within the range of the player and no other text box is open
+        if (withinRange(_outsideShop) &&!_outsideLampTextVisible && !_outsideLockedMsgVisible && _outsideBoxMsgText.getString().isEmpty() && _outsideShop.getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+
+
+            _outsideShopTextVisible = true;
+        }
+
+        //closes the text box
+        if (_outsideShopTextVisible && sf::Keyboard::isKeyPressed(sf::Keyboard::Delete)) {
+            _outsideShopTextVisible = false;
+        }
+
+        //opens the picture text if it is clicked and within the range of the player and no other text box is open
+        if (withinRange(_outsideLamp) && !_outsideShopTextVisible && !_outsideLockedMsgVisible && _outsideBoxMsgText.getString().isEmpty() && _outsideLamp.getGlobalBounds().contains((float)mousePos.x, (float)mousePos.y) && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+
+            _outsideLampTextVisible = true;
+            _outsideDoorClickable = true;
+        }
+        //closes the text box
+        if (_outsideLampTextVisible && sf::Keyboard::isKeyPressed(sf::Keyboard::Delete)) {
+            _outsideLampTextVisible = false;
+        }
+
+
+
+        //opens the Door text if it is clicked and within the range of the player and no other text box is open
+        if (withinRange(_outsideDoor) && _outsideDoor.getGlobalBounds().contains(mousePos.x, mousePos.y) &&
+            sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            //changes to the padlock if the user ahs seen the book clue
+            if (_outsideDoorClickable)
+            {
+                std::cout << "Door clicked!" << std::endl;
+                _state = OutsideState::Name;
+            }
+            //this shows that the door is locked if the user has not seen the book clue
+            else
+            {
+
+                _outsideLockedMsgVisible = true;
+            }
+        }
+        
+        //closes the text box
+        if (_outsideLockedMsgVisible && sf::Keyboard::isKeyPressed(sf::Keyboard::Delete))
+        {
+            _outsideLockedMsgVisible = false;
+        }
+
+    }
+
+
+//Checks to see if the player is in padlock mode of the level
+    else if (_state == OutsideState::Name) {
+        //this adds the number pressed by the user to the code and displays it on the screen 
+        for (int key = sf::Keyboard::A; key <= sf::Keyboard::Z; key++) {
+            if (sf::Keyboard::isKeyPressed((sf::Keyboard::Key)key) && _outsideEnteredName.size() < 4) {
+                _outsideEnteredName += char('A' + (key - sf::Keyboard::A));
+            }
+        }
+
+        //deletes the newest number if backspace was pressed
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace) && !_outsideEnteredName.empty()) {
+            _outsideEnteredName.pop_back();
+        }
+
+        //Check to see if teh code is correct
+        if (_outsideEnteredName == "JOHN") {
+
+            GameSystem::set_active_scene(Scenes::level2);
+        }
+
+        _outsideLockText.setString(_outsideEnteredName);
+
+        //chenges the mode back to explore
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Delete))
+        {
+            _state = OutsideState::Exploring;
+        }
+    }
+
+    _BoxSprite.setPosition(_outsideBox.getPosition());
+    _outsideLeftMouseDownPrev = leftMouseDown;
+
+    Scene::update(dt);
+
+}
+
+//This renders all the elements of level3
+void Level1Scene::render() {
+    Renderer::queue(&_outsideBackground);
+
+    Renderer::queue(&_ShopSprite);
+    Renderer::queue(&_outsideShop);
+
+
+    Renderer::queue(&_outsideLamp);
+    Renderer::queue(&_LampSprite);
+
+
+
+
+    Renderer::queue(&_outsideDoor);
+    Renderer::queue(&_DoorSprite);
+
+
+
+    Renderer::queue(&_outsidePlayer);
+    Renderer::queue(&_playerSprite);
+
+
+
+    //Checks to see if different elements of the game should be loaded in
+    if (_state == OutsideState::Name) {
+        Renderer::queue(&_outsideLockText);
+        Renderer::queue(&_outsideLockInstr);
+    }
+
+
+
+    if (_outsideShopTextVisible) {
+        Renderer::queue(&_outsideShopBox);
+        Renderer::queue(&_outsideShopText);
+    }
+
+    if (_outsideLampTextVisible) {
+        Renderer::queue(&_outsideLampText);
+    }
+
+
+    if (_outsideLockedMsgVisible)
+    {
+        Renderer::queue(&_outsideLockedMsgBox);
+        Renderer::queue(&_outsideLockedMsgText);
+    }
+
+    if (!_outsideBoxMsgText.getString().isEmpty())
+    {
+        Renderer::queue(&_outsideBoxMsgText);
+    }
+    Scene::render();
+}
+
+
+void Level1Scene::load() {
+
+    //originally sets the state to explore
+    _state = OutsideState::Exploring;
+    _outsideEnteredName = "";
+
+
+
+
+    //Loads in all teh resources required for the level
+
+    _outsideBgTexture.loadFromFile("resources/images/outside_background.png");
+    _outsideBackground.setTexture(_outsideBgTexture);
+    _outsideBackground.setScale(1920.f / _outsideBgTexture.getSize().x, 1080.f / _outsideBgTexture.getSize().y);
+
+
+
+
+
+
+    if (!_playerTexture.loadFromFile("resources/images/player.png")) {
+        std::cerr << "Failed to load player texture!\n";
+    }
+
+    _outsideFont.loadFromFile("resources/fonts/RobotoMono-Regular.ttf");
+
+
+    //This sets all of the variables up for the drawer
+
+
+
+
+    //This sets all of the variables up for the bookshelf
+
+    _lampTexture.loadFromFile("resources/images/lamp.png");
+    _LampSprite.setTexture(_lampTexture);
+
+    _LampSprite.setScale(6.f, 6.f);
+    _LampSprite.setPosition(1272.f, 608.f);
+
+    _outsideLamp.setSize({ 120, 340 });
+    _outsideLamp.setPosition(1272.f, 608.f);
+    _outsideLamp.setFillColor(sf::Color(0, 0, 0, 0));
+
+
+    //This sets all of the variables up for the picture
+
+    _shopTexture.loadFromFile("resources/images/shop.png");
+    _ShopSprite.setTexture(_shopTexture);
+
+    _ShopSprite.setScale(3.f, 3.f);
+    _ShopSprite.setPosition(444.f, 656.f);
+
+    _outsideShop.setSize({ 350, 300});
+    _outsideShop.setPosition(444.f, 656.f);
+    _outsideShop.setFillColor(sf::Color(0, 0, 0, 0));
+
+
+    //This sets all of the variables up for the door
+
+    _DoorTexture.loadFromFile("resources/images/door_closed.png");
+    _DoorSprite.setTexture(_DoorTexture);
+
+    _DoorSprite.setScale(12.5f, 12.5f);
+    _DoorSprite.setPosition(50, 550);
+
+    _outsideDoor.setSize({ 200, 400 });
+    _outsideDoor.setFillColor(sf::Color(0, 0, 0, 0));
+    _outsideDoor.setPosition(50, 550);
+
+
+    //This sets all of the variables up for the player
+    _player.setSize({ 60.f, 120.f });
+    _player.setOrigin(_player.getSize() / 2.f);
+    _playerSprite.setTexture(_playerTexture);
+    _playerSprite.setScale(
+        _player.getSize().x / _playerTexture.getSize().x,
+        _player.getSize().y / _playerTexture.getSize().y);
+    _playerPos.x = param::game_width / 2.f;
+    _playerPos.y = 830;
+    _player.setPosition(_playerPos);
+    _playerSprite.setPosition(_playerPos);
+
+    _outsidePlayer.setSize({ 60, 120 });
+    _outsidePlayer.setFillColor(sf::Color(0, 0, 0, 0));
+    _outsidePlayer.setPosition(200, _outsideBoxFloorY - _outsidePlayer.getSize().y);
+    _outsidePlayerVelocity = { 0.f, 0.f };
+
+    _outsideBoxMsgText.setFont(_outsideFont);
+    _outsideBoxMsgText.setCharacterSize(28);
+    _outsideBoxMsgText.setFillColor(sf::Color::Black);
+    _outsideBoxMsgText.setPosition(575, 350);
+
+
+    _outsideShopBox.setSize({ 600, 200 });
+    _outsideShopBox.setFillColor(sf::Color(0, 0, 0, 0));
+    _outsideShopBox.setPosition(660, 300);
+
+
+    _outsideShopText.setFont(_outsideFont);
+    _outsideShopText.setCharacterSize(28);
+    _outsideShopText.setFillColor(sf::Color::Black);
+    _outsideShopText.setString("Riddle 1\nI知 the first in January and the start of a joke.\nYou値l see me at the front of a jungle,\n but I知 nowhere in a forest.\nWhat am I?\nRiddle 2\nI知 the start of open and the end of hello. \nI appear twice in door, but only once in window. \nWhat am I?");
+    _outsideShopText.setPosition(700, 350);
+
+
+    _outsideLampBox.setSize({ 600, 200 });
+    _outsideLampBox.setFillColor(sf::Color(0, 0, 0, 0));
+    _outsideLampBox.setPosition(660, 300);
+
+    _outsideLampText.setFont(_outsideFont);
+    _outsideLampText.setCharacterSize(28);
+    _outsideLampText.setFillColor(sf::Color::Black);
+    _outsideLampText.setString("You notice some graffiti on the lamp post \n 'H'");
+    _outsideLampText.setPosition(700, 350);
+
+    //This sets all of the variables up for the padlock
+    _outsideLockText.setFont(_outsideFont);
+    _outsideLockText.setCharacterSize(70);
+    _outsideLockText.setFillColor(sf::Color::White);
+    _outsideLockText.setPosition(800, 450);
+    _outsideLockText.setString("____");
+
+    _outsideLockInstr.setFont(_outsideFont);
+    _outsideLockInstr.setCharacterSize(28);
+    _outsideLockInstr.setFillColor(sf::Color::Yellow);
+    _outsideLockInstr.setPosition(650, 550);
+    _outsideLockInstr.setString("Enter your Name (All capital) and with a N");
+
+    //This sets all of the variables up for the door locked message
+    _outsideLockedMsgBox.setSize({ 600, 200 });
+    _outsideLockedMsgBox.setFillColor(sf::Color(200, 50, 50));
+    _outsideLockedMsgBox.setPosition(660, 300);
+
+    _outsideLockedMsgText.setFont(_outsideFont);
+    _outsideLockedMsgText.setCharacterSize(28);
+    _outsideLockedMsgText.setFillColor(sf::Color::White);
+    _outsideLockedMsgText.setString("The door is locked!");
+    _outsideLockedMsgText.setPosition(700, 350);
+
+
+    //clears all the sprites and bodies
+    _sprites.clear();
+    _bodies.clear();
+
+    b2WorldDef world_def = b2DefaultWorldDef();
+    world_def.gravity = { 0.0f, param::g };
+    _world_id = b2CreateWorld(&world_def);
+
+
+
+}
+
 //This makes the logic of the Level3  
-void Level3Scene::update(const float& dt) {
+void Level2Scene::update(const float& dt) {
 
     //This gets the position of the mouse on te game
     sf::Vector2i mousePos = sf::Mouse::getPosition(Renderer::get_window());
@@ -352,7 +717,7 @@ void Level3Scene::update(const float& dt) {
             _houseEnteredCode.pop_back();
         }
 
-        //Check to see if teh code is correct
+        //Check to see if the code is correct
         if (_houseEnteredCode == "2334") {
             _houseDoorOpenSound.play();
             GameSystem::set_active_scene(Scenes::menu);
@@ -375,7 +740,7 @@ void Level3Scene::update(const float& dt) {
 }
 
 //This renders all the elements of level3
-void Level3Scene::render() {
+void Level2Scene::render() {
     Renderer::queue(&_houseBackground);
     Renderer::queue(&_DrawerLegsLeft);
     Renderer::queue(&_DrawerLegsRight);
@@ -432,7 +797,7 @@ void Level3Scene::render() {
 }
 
 //This sets all of the elements to the desired position and states in level3
-void Level3Scene::load() {
+void Level2Scene::load() {
 
     //originally sets the state to explore
     _state = HouseState::Explore;
@@ -586,9 +951,7 @@ void Level3Scene::load() {
     _houseNoteText.setPosition(700, 350);
 
     //This sets all of the variables up for the book clue
-    _houseClueBox.setSize({ 600, 200 });
-    _houseClueBox.setFillColor(sf::Color(0, 0, 0, 0));
-    _houseClueBox.setPosition(660, 300);
+;
 
     _houseClueText.setFont(_houseFont);
     _houseClueText.setCharacterSize(28);
